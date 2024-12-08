@@ -14,17 +14,18 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // Password encoder bean for encoding passwords
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable() // Disable CSRF for testing (not recommended for production)
+            .csrf().disable() // Disable CSRF protection for testing purposes (not recommended for production)
             .authorizeRequests()
-            .requestMatchers("/api/signup", "/api/signin").permitAll() // Allow unauthenticated access to these endpoints
-            .anyRequest().authenticated(); // Require authentication for other requests
+            .requestMatchers("/api/signup", "/api/signin").permitAll() // Allow unauthenticated access to signup and signin
+            .requestMatchers("/api/bookings/**").authenticated() // Require authentication for booking endpoints
+            .anyRequest().permitAll(); // Allow all other requests
 
-        return http.build();
+        return http.build(); // Build and return the security filter chain
     }
 }

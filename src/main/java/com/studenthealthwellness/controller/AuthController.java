@@ -1,6 +1,6 @@
 package com.studenthealthwellness.controller;
 
-import com.studenthealthwellness.model.UpdateRequest;
+
 import com.studenthealthwellness.model.User;
 import com.studenthealthwellness.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class AuthController {
         }
     }
 
-    // Signin endpoint
+    //Signin endpoint
     @PostMapping("/signin")
     public ResponseEntity<?> signin(@RequestBody User user) {
         Optional<User> loggedInUser = userService.signin(user.getEmail(), user.getPassword());
@@ -42,22 +42,34 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid email or password");
         }
     }
-
-    // Update username and password endpoint
-    @PutMapping("/users/{id}/update")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateRequest updateRequest) {
+    
+ //Update User endpoint
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         try {
-            // Validate updateRequest fields
-            if (updateRequest.getUsername() == null && updateRequest.getPassword() == null) {
-                return ResponseEntity.badRequest().body("No fields to update");
+            Optional<User> user = userService.updateUser(id, updatedUser);
+            if (user.isPresent()) {
+                return ResponseEntity.ok(user.get());
+            } else {
+                return ResponseEntity.notFound().build();
             }
-
-            // Call the service to update the user
-            userService.updateUser(id, updateRequest.getUsername(), updateRequest.getPassword());
-            return ResponseEntity.ok("User updated successfully");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("Error during update: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error updating user: " + e.getMessage());
         }
     }
+
+    //Delete User endpoint
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            boolean isDeleted = userService.deleteUser(id);
+            if (isDeleted) {
+                return ResponseEntity.ok("User deleted successfully.");
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting user: " + e.getMessage());
+        }
+    } 
 }
